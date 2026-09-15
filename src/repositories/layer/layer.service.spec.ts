@@ -23,7 +23,7 @@ function makeVersion(overrides: Partial<ProjectVersion> = {}): ProjectVersion {
 
 describe('LayerService', () => {
   let service: LayerService;
-  let layerRepository: { create: ReturnType<typeof vi.fn>; save: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
+  let layerRepository: { create: ReturnType<typeof vi.fn>; save: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn>; findOne: ReturnType<typeof vi.fn> };
   let projectVersionService: { GetByIdForProject: ReturnType<typeof vi.fn>; AssertEditable: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
@@ -31,6 +31,7 @@ describe('LayerService', () => {
       create: vi.fn((value) => value),
       save: vi.fn(async (value) => value),
       update: vi.fn(async () => ({ affected: 1 })),
+      findOne: vi.fn(async () => null),
     };
     projectVersionService = {
       GetByIdForProject: vi.fn(async () => makeVersion()),
@@ -82,6 +83,29 @@ describe('LayerService', () => {
 
       expect(layerRepository.save).not.toHaveBeenCalled();
     });
+
+    it('defaults hidden to false when not provided', async () => {
+      const layer = await service.CreateLayer('project-1', 'version-1', {
+        name: 'background',
+        type: 'shape',
+        transformationMatrix: {},
+        options: {},
+      } as never);
+
+      expect(layer.hidden).toBe(false);
+    });
+
+    it('passes hidden: true through when provided', async () => {
+      const layer = await service.CreateLayer('project-1', 'version-1', {
+        name: 'background',
+        type: 'shape',
+        transformationMatrix: {},
+        options: {},
+        hidden: true,
+      } as never);
+
+      expect(layer.hidden).toBe(true);
+    });
   });
 
   describe('UpdateLayer', () => {
@@ -93,6 +117,20 @@ describe('LayerService', () => {
       await expect(
         service.UpdateLayer('project-1', 'version-1', 'layer-1', { name: 'renamed' }),
       ).rejects.toThrow(ConflictException);
+    });
+
+    it('updates hidden when provided', async () => {
+      const existing = new Layer();
+      existing.id = 'layer-1';
+      existing.projectVersionId = 'version-1';
+      existing.name = 'background';
+      existing.type = 'shape';
+      existing.hidden = false;
+      layerRepository.findOne.mockResolvedValue(existing);
+
+      const layer = await service.UpdateLayer('project-1', 'version-1', 'layer-1', { hidden: true });
+
+      expect(layer.hidden).toBe(true);
     });
   });
 });

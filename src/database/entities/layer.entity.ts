@@ -53,6 +53,19 @@ export class Layer {
   })
   order: number = 0;
 
+  // Lets an admin temporarily disable a layer without deleting it (e.g. to
+  // compare variants). Respected by the actual render pipeline (see
+  // RenderEngineService.RenderProjectVersion), not just the dashboard
+  // preview - a hidden layer is skipped entirely, same as if it didn't
+  // exist, rather than rendered with reduced opacity or similar.
+  @Column({
+    name: 'hidden',
+    type: 'boolean',
+    default: false,
+    nullable: false,
+  })
+  hidden: boolean = false;
+
   @Column({
     name: 'type',
     type: 'varchar',

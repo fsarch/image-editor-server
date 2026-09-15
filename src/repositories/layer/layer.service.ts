@@ -30,6 +30,7 @@ export class LayerService {
       type: createDto.type,
       transformationMatrix: createDto.transformationMatrix,
       options: createDto.options,
+      hidden: createDto.hidden ?? false,
     });
 
     return this.layerRepository.save(layer);
@@ -98,6 +99,7 @@ export class LayerService {
     if (updateDto.transformationMatrix !== undefined)
       layer.transformationMatrix = updateDto.transformationMatrix;
     if (updateDto.options !== undefined) layer.options = updateDto.options;
+    if (updateDto.hidden !== undefined) layer.hidden = updateDto.hidden;
 
     return this.layerRepository.save(layer);
   }

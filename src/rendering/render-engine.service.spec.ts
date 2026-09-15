@@ -71,6 +71,7 @@ function makeLayer(overrides: Partial<Layer>): Layer {
     f: { type: 'constant', value: 0 },
   };
   layer.options = overrides.options ?? {};
+  layer.hidden = overrides.hidden ?? false;
   return layer;
 }
 
@@ -148,6 +149,20 @@ describe('RenderEngineService', () => {
       fakeContext,
       expect.objectContaining({ content: 'Jane' }),
     );
+  });
+
+  it('skips hidden layers entirely, as if they did not exist', async () => {
+    projectVersionService.GetById.mockResolvedValue(makeVersion());
+    parameterService.ListByProjectVersion.mockResolvedValue([]);
+    layerService.ListByProjectVersion.mockResolvedValue([
+      makeLayer({ order: 0, type: 'shape', hidden: true, options: { shape: { type: 'constant', value: 'rectangle' } } }),
+      makeLayer({ order: 1, type: 'text', hidden: false, options: { content: { type: 'constant', value: 'visible' } } }),
+    ]);
+
+    await service.RenderProjectVersion('version-1', {});
+
+    expect(compositor.drawShape).not.toHaveBeenCalled();
+    expect(compositor.drawText).toHaveBeenCalledOnce();
   });
 
   it('renders html layers via the HtmlLayerRendererService and composites the result', async () => {

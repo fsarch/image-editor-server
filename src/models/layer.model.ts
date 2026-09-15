@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 import type { Layer, LayerType } from '../database/entities/layer.entity.js';
 
 const LAYER_TYPES: LayerType[] = ['text', 'image', 'shape', 'html'];
@@ -46,6 +46,11 @@ export class LayerCreateDto {
   })
   @IsObject()
   options: unknown;
+
+  @ApiProperty({ required: false, default: false, description: 'Skipped entirely by the render pipeline when true' })
+  @IsOptional()
+  @IsBoolean()
+  hidden?: boolean;
 }
 
 export class LayerUpdateDto {
@@ -80,6 +85,11 @@ export class LayerUpdateDto {
   @IsOptional()
   @IsObject()
   options?: unknown;
+
+  @ApiProperty({ required: false, description: 'Skipped entirely by the render pipeline when true' })
+  @IsOptional()
+  @IsBoolean()
+  hidden?: boolean;
 }
 
 export class LayerDto {
@@ -94,6 +104,7 @@ export class LayerDto {
     dto.type = layer.type;
     dto.transformationMatrix = layer.transformationMatrix;
     dto.options = layer.options;
+    dto.hidden = layer.hidden;
     dto.creationTime = layer.creationTime;
     dto.deletionTime = layer.deletionTime;
 
@@ -123,6 +134,9 @@ export class LayerDto {
 
   @ApiProperty({ type: Object })
   options: unknown;
+
+  @ApiProperty()
+  hidden: boolean;
 
   @ApiProperty()
   creationTime: Date;

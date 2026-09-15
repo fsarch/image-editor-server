@@ -58,6 +58,12 @@ export class RenderEngineService {
     const sortedLayers = [...layers].sort((a, b) => a.order - b.order);
 
     for (const layer of sortedLayers) {
+      // A hidden layer is skipped entirely, same as if it didn't exist -
+      // lets an admin temporarily disable it (e.g. to compare variants)
+      // without deleting it. Not just a dashboard-preview affordance: the
+      // actual rendered PNG omits it too.
+      if (layer.hidden) continue;
+
       const transform = resolveBindableTree(
         layer.transformationMatrix,
         validatedParameters,

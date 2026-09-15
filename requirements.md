@@ -117,8 +117,10 @@ type BindableValue<T> =
 1. Load the ProjectVersion (404 if missing), its Parameters, and its Layers (sorted by `order`).
 2. Build a Zod schema from the Parameters and validate the request's `parameters` (`400 BadRequestException` with Zod issues on failure).
 3. Create an `@napi-rs/canvas` canvas sized `width`×`height`.
-4. For each Layer, in order: resolve `transformationMatrix`/`options` via the BindableValue resolver against the validated parameters; `ctx.save()`; `ctx.setTransform(a,b,c,d,e,f)`; draw per `type` (`text→fillText`, `image→`decode base64 + `drawImage`, `shape→`path fill/stroke, `html→` see below); `ctx.restore()`.
+4. For each Layer, in order: skip it entirely if `hidden` is true (see below); otherwise resolve `transformationMatrix`/`options` via the BindableValue resolver against the validated parameters; `ctx.save()`; `ctx.setTransform(a,b,c,d,e,f)`; draw per `type` (`text→fillText`, `image→`decode base64 + `drawImage`, `shape→`path fill/stroke, `html→` see below); `ctx.restore()`.
 5. Encode the canvas to PNG and return the buffer.
+
+**Layer visibility (`hidden`)**: a boolean column on Layer (default `false`), settable via the Create/Update DTOs. A hidden layer is skipped entirely by the render pipeline — same as if it didn't exist — not merely hidden with reduced opacity. Lets an admin temporarily disable a layer (e.g. to compare variants) without deleting it; the dashboard's WYSIWYG editor mirrors this in its own live preview.
 
 **HTML layers**: pre-rendered via a lazily-created, module-wide **shared Puppeteer browser** (`HtmlLayerRendererService`, mirrors `pdf-render-backend`'s pattern) — set viewport to the resolved width/height, transparent background, `page.setContent(html)`, screenshot to PNG (`omitBackground:true`), then drawn onto the main canvas exactly like an image layer. Puppeteer is launched with `--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage`; JavaScript execution and all network requests are disabled on the page; one retry with a fresh browser on a "target/session closed" crash.
 
