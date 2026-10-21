@@ -1,11 +1,22 @@
 {
-  "name": "image-editor-server",
+  "name": "@fsarch/image-editor-server",
   "version": "0.0.1",
   "description": "",
   "author": "",
-  "private": true,
   "license": "UNLICENSED",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/lib/index.js",
+      "types": "./dist/lib/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "engines": {
     "node": ">=24.0.0"
   },
@@ -27,7 +38,7 @@
     "test:update-baselines": "UPDATE_RENDER_BASELINES=1 vitest run src/rendering/render-engine.baseline.spec.ts"
   },
   "dependencies": {
-    "@fsarch/server": "^0.5.1",
+    "@fsarch/server": "^0.5.2",
     "@napi-rs/canvas": "^1.0.9",
     "@nestjs/common": "^12.0.1",
     "@nestjs/core": "^12.0.1",
@@ -60,5 +71,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2",
     "vitest": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fsarch/image-editor-server.git"
   }
 }

@@ -1,5 +1,4 @@
 import { createServiceModule } from '@fsarch/server';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Project } from '../database/entities/project.entity.js';
 import { ProjectVersion } from '../database/entities/project-version.entity.js';
 import { Parameter } from '../database/entities/parameter.entity.js';
@@ -51,7 +50,6 @@ export const ImageEditorServerModule = createServiceModule({
     CanvasCompositorService,
     HtmlLayerRendererService,
   ],
-  imports: [EventEmitterModule.forRoot()],
   exports: [
     ProjectService,
     ProjectVersionService,
